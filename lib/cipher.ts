@@ -35,7 +35,9 @@ export function processCipher(
     .split("")
     .map((n) => parseInt(n))
     .filter((n) => !isNaN(n)); // Remove spaces and convert to integers, filter out non-numeric
-    
+  
+  const safeKeyArray = keyArray.length > 0 ? keyArray : [0]; // Ensure we have at least one shift value
+
   const chars = finalPhrase.split("");
 
   let keyIndex = 0;
@@ -44,7 +46,7 @@ export function processCipher(
     const index = keyword.indexOf(chars[i]);
 
     if (index !== -1) {
-      const shift = keyArray[keyIndex % keyArray.length];
+      const shift = safeKeyArray[keyIndex % safeKeyArray.length];
 
       const newIndex =
         mode === "encode"

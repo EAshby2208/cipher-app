@@ -9,13 +9,13 @@ import CipherResult from "./cipher_result";
 
 export default function Cipher() {
   const defaultKeyPhrase = "CIPHER";
-  const defaultNums = "31415926";
+  const defaultNums = "314159";
 
   const [result, setResult] = useState("");
   const [keyword, setKeyword] = useState<string[]>([]);
   const [keycode, setKeycode] = useState(defaultNums);
 
-  function handleProcess(
+  async function handleProcess(
     phrase: string,
     keyphrase: string,
     keycode: string,
@@ -24,16 +24,32 @@ export default function Cipher() {
     const keyToUse = keyphrase.trim() || defaultKeyPhrase;
     const numsToUse = keycode.trim() || defaultNums;
 
-    const output = processCipher(
-      phrase,
-      keyToUse,
-      numsToUse,
-      mode
-    );
+    try {
+      const res = await fetch("/api/cipher", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phrase,
+          keyphrase: keyToUse,
+          keycode: numsToUse,
+          mode,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error("Request failed");
+      }
 
-    setResult(output.result);
-    setKeyword(output.keyword);
-    setKeycode(numsToUse);
+      const data = await res.json();
+
+      setResult(data.result);
+      setKeyword(data.keyword);
+      setKeycode(numsToUse);
+    } catch (error) {
+      console.error("Error processing cipher:", error);
+      setResult("Error processing cipher. Please try again.");
+    }
   }
 
   return (
@@ -43,6 +59,8 @@ export default function Cipher() {
       </h1>
       <div className="text-center text-sm text-zinc-500">
         Enter a keyword to build the cipher key, and a numeric code to encode or decode your message. If no keyword or code is provided, defaults will be used.
+        <br />
+        Default Keyword: <strong>{defaultKeyPhrase}</strong>, Default Code: <strong>{defaultNums}</strong>.
       </div>
 
       <CipherForm onProcess={handleProcess} />
