@@ -36,6 +36,11 @@ export function processCipher(
     .map((n) => parseInt(n))
     .filter((n) => !isNaN(n)); // Remove spaces and convert to integers, filter out non-numeric
   
+  
+  if (keyArray.length === 0) {
+    throw new Error("Invalid keycode");
+  }
+
   const safeKeyArray = keyArray.length > 0 ? keyArray : [0]; // Ensure we have at least one shift value
 
   const chars = finalPhrase.split("");

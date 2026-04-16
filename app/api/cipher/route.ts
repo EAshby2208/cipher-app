@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   
   try {
     const body = await req.json();
-    const { phrase, keyphrase, keycode, mode } = body;
+    const { phrase, keyphrase, keycode, mode, save } = body;
 
     // Basic validation (helps prevent crashes)
     if (!phrase || !mode) {
@@ -21,20 +21,34 @@ export async function POST(req: Request) {
     // Run cipher logic
     const result = processCipher(phrase, keyphrase, keycode, mode);
 
-    // Save to database
-    const { error } = await supabase.from("messages").insert({
-      phrase,
-      result: result.result,
-      keyphrase,
-      keycode,
-    });
+    if (save) {
+      const { // Check if user is authenticated
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (error) {
-      console.error("Error saving message:", error);
-      return NextResponse.json(
-        { error: "Failed to save message" },
-        { status: 500 }
-      );
+      if (!user) {
+        return NextResponse.json(
+          { error: "Unauthorized" },
+          { status: 401 }
+        );
+      }
+
+      // Save to database
+      const { error } = await supabase.from("messages").insert({
+        phrase,
+        result: result.result,
+        keyphrase,
+        keycode,
+        user_id: user.id,
+      });
+
+      if (error) {
+        console.error("Supabase insert error:", error.message, error.details);
+        return NextResponse.json(
+          { error: "Failed to save message" },
+          { status: 500 }
+        );
+      }
     }
 
     // Return the result to frontend
