@@ -64,7 +64,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="w-full max-w-3xl bg-white dark:bg-zinc-900 rounded-2xl shadow-xl p-8 space-y-6">
+    <div className="w-full min-h-screen max-w-7xl mx-auto bg-white dark:bg-zinc-900 rounded-2xl shadow-xl p-6 space-y-6">
 
       <div className="flex justify-end items-center">
         <LogoutButton />

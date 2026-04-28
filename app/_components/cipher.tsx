@@ -157,7 +157,7 @@ export default function Cipher({onSaved}: {onSaved: () => void}) {
   }
 
   return (
-    <div className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-2xl shadow-xl p-8 space-y-6">
+    <div className="w-full max-w-none bg-white dark:bg-zinc-900 rounded-2xl shadow-xl p-8 space-y-6">
       <h1 className="text-3xl font-bold text-center">
         Cipher Encoder / Decoder
       </h1>
