@@ -23,6 +23,16 @@ export default function Cipher({onSaved}: {onSaved: () => void}) {
     mode: "encode" | "decode",
     save: boolean
   ) {
+
+    // clear old analysis when processing a new cipher
+    setAnalysis("");
+    setAnalyzing(false);
+
+    if (!phrase.trim()) {
+      setResult("Please enter a phrase to encode/decode.");
+      return;
+    }
+
     const keyToUse = keyphrase.trim() || defaultKeyPhrase;
     const numsToUse = keycode.trim() || defaultNums;
 
