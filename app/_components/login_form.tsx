@@ -17,6 +17,7 @@ export default function LoginForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError(null);
 
@@ -32,7 +33,7 @@ export default function LoginForm() {
       return;
     } else {
       router.push("/dashboard");
-      router.refresh();
+      // router.refresh();
     }
   };
 

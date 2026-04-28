@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { runWorker } from "./worker/route";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -11,7 +12,7 @@ export async function POST(req: Request) {
     const { phrase, keyphrase, keycode } = body;
 
     // Basic validation (helps prevent crashes)
-    if (!phrase || !keyphrase || !keycode) {
+    if (!phrase) { // only phrase is required, keyphrase and keycode can be optional because of defaults
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -40,7 +41,16 @@ export async function POST(req: Request) {
       .select()
       .single();
 
-    if (!job) {
+    // trigger worker to process jobs immediately (instead of waiting for next scheduled run)
+    // const baseURL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    // fetch(`${baseURL}/api/analyze/worker`, {
+    //   method: "POST",
+    // })
+    runWorker().catch((err) => {
+      console.error("Error triggering worker:", err);
+    });
+
+    if (!job) { // should never happen, but just in case
       return NextResponse.json(
         { error: "Failed to create analysis job" },
         { status: 500 }

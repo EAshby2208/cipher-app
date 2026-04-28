@@ -77,7 +77,7 @@ export default function CipherForm({
           Decode
         </button>
         {onAnalyze && (
-          <button
+          <button disabled={!phrase}
             onClick={() => onAnalyze(phrase, keyphrase, keycode)}
             className="flex-1 bg-slate-600 text-white py-3 rounded-lg hover:bg-slate-500"
           >

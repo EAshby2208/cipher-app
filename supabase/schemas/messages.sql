@@ -1,5 +1,7 @@
 -- supabase/schemas/messages.sql
 
+DROP TABLE IF EXISTS messages CASCADE;
+
 CREATE TABLE IF NOT EXISTS messages (
   id uuid PRIMARY KEY Default gen_random_uuid(),
   user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -7,6 +9,7 @@ CREATE TABLE IF NOT EXISTS messages (
   result text NOT NULL,
   keyphrase text NOT NULL,
   keycode text NOT NULL,
+  mode text NOT NULL CHECK (mode IN ('encode', 'decode')),
   created_at timestamp default now()
 );
 
@@ -25,3 +28,8 @@ ON messages
 FOR SELECT
 USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own messages" ON messages;
+CREATE POLICY "Users can delete their own messages"
+ON messages
+FOR DELETE
+USING (auth.uid() = user_id);

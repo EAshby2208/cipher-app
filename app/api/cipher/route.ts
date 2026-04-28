@@ -39,6 +39,7 @@ export async function POST(req: Request) {
         result: result.result,
         keyphrase,
         keycode,
+        mode,
         user_id: user.id,
       });
 

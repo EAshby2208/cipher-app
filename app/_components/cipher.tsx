@@ -6,7 +6,7 @@ import { useState } from "react";
 import CipherForm from "./cipher_form";
 import CipherResult from "./cipher_result";
 
-export default function Cipher() {
+export default function Cipher({onSaved}: {onSaved: () => void}) {
   const defaultKeyPhrase = "CIPHER";
   const defaultNums = "314159";
 
@@ -46,7 +46,7 @@ export default function Cipher() {
         try {
           const err = await res.json();
           console.error("API error:", err);
-          errMessage = err.error || errMessage;
+          errMessage = err?.error || JSON.stringify(err);
         } catch {
           console.error("API error: Unable to parse error response");
         }
@@ -61,12 +61,16 @@ export default function Cipher() {
       setResult(data.result);
       setKeyword(data.keyword);
       setKeycode(numsToUse);
+
+      if (save) {
+        onSaved();
+      }
+      
     } catch (error) {
       console.error("Error processing cipher:", error);
       setResult("Error processing cipher. Please try again.");
     }
   }
-
 
   // states for analysis
   const [analysis, setAnalysis] = useState("");
@@ -78,6 +82,11 @@ export default function Cipher() {
     keyphrase: string,
     keycode: string,
   ) {
+    if (!phrase.trim()) {
+      setAnalysis("Please enter a phrase to analyze.");
+      return;
+    }
+
     const keyToUse = keyphrase.trim() || defaultKeyPhrase;
     const numsToUse = keycode.trim() || defaultNums;
 
@@ -85,6 +94,8 @@ export default function Cipher() {
     setAnalysis("");
 
     try {
+      console.log("Submitting analysis job with:", { phrase, keyToUse, numsToUse });
+
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: {
@@ -98,19 +109,25 @@ export default function Cipher() {
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        console.error("API error:", err);
-        throw new Error(err.error || "Request failed");
+        let errMessage = "Request failed";
+        try {
+          const err = await res.json();
+          console.error("API error:", err);
+          errMessage = err?.error || JSON.stringify(err);
+        } catch {
+          console.error("API error: Unable to parse error response");
+        }
+        throw new Error(errMessage);
       }
 
       // get job id from response
       const { jobId } = await res.json();
       // Poll for result
       const interval = setInterval(async () => {
-        const statusRes = await fetch(`/api/analyze/status?jobId=${jobId}`);
-        const job = await statusRes.json();
+        const statusRes = await fetch(`/api/analyze/${jobId}`);
+        const {job} = await statusRes.json();
 
-        if (job.status === "complete") {
+        if (job.status === "completed") {
           setAnalysis(job.result);
           setAnalyzing(false);
           clearInterval(interval);
@@ -145,7 +162,7 @@ export default function Cipher() {
       <CipherResult result={result} keyword={keyword} code={keycode}/>
       
       {analyzing && (
-        <p className="text-sm text-zinc-500">Analyzing...</p>
+        <p className="text-sm text-zinc-500">Analyzing Cipher (this may take a take a few seconds)...</p>
       )}
 
       {analysis && (

@@ -13,3 +13,9 @@ create policy "Users can view their own messages"
 on messages
 for select
 using (auth.uid() = user_id);
+
+drop policy if exists "Users can delete their own messages" on messages;
+create policy "Users can delete their own messages"
+on messages
+for delete
+using (auth.uid() = user_id);

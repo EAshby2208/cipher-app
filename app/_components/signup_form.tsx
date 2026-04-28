@@ -17,13 +17,20 @@ export default function SignupForm() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) {
+      console.log("Blocked duplicate signup");
+      return;
+    }
+    console.log("Signup attempt starting")
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
+
+    console.log("Signup response: ", data, error);
 
     setLoading(false);
 
