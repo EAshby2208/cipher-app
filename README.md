@@ -4,12 +4,12 @@
 
 This project is a full-stack web application that allows users to encrypt and decrypt messages using a customizable cipher system, store those messages, and receive AI-generated analysis of their cipher.
 
-This application combines
-* A keyword-based substituion cipher
+This application combines:
+* A keyword-based substitution cipher
 * A repeating numeric shift system
-* Asynchronus AI-powered analysis
+* Asynchronous AI-powered analysis
 
-Users can experiement with cipher configurations, save results to a personal dashboard, and request intelligent feedback on the strength and structure of their cipher.
+Users can experiment with cipher configurations, save results to a personal dashboard, and request intelligent feedback on the strength and structure of their cipher.
 
 ## Features
 
@@ -27,8 +27,8 @@ Users can experiement with cipher configurations, save results to a personal das
     * Delete saved messages
 * **AI-Powered Cipher Analysis**
     * Explain how the cipher works
-    * Describes keyword + numeric key roles
-    * Evaluates cipher strength
+    * Describe keyword + numeric key roles
+    * Evaluate cipher strength
 * **Background Job Processing**
     * Analysis runs asynchronously (non-blocking)
     * Job status tracked in database
@@ -52,7 +52,7 @@ The cipher combines two techniques:
 ### AI Analysis Flow
 1. User clicks **Analyze Cipher**
 2. App creates a job in the database (`analysis_jobs`)
-3. Backgorund worker processes the job
+3. Background worker processes the job
 4. OpenAI generates an explanation
 5. Result is saved and returned to frontend
 
@@ -65,11 +65,11 @@ The cipher combines two techniques:
 ### Backend
 * Next.js API Routes
 ### Database & Auth
-* Supabase (ProstgreSQL + Auth)
+* Supabase (PostgreSQL + Auth)
 ### AI Integration
-* Open AI API
+* OpenAI API
 * Vercel AI SDK
-### Backgroudn Processing
+### Background Processing
 * Database-backed job queue using Supabase
 * Worker function processes jobs asynchronously
 
@@ -83,7 +83,7 @@ Stores user messages
 * `keyphrase`
 * `keycode`
 * `mode`
-* `create_at`
+* `created_at`
 
 ### `analysis_jobs`
 Handles background AI processing
@@ -98,11 +98,81 @@ Handles background AI processing
 
 ## Background Worker Design
 
+The application uses a **database-backed job queue**:
+* Jobs are inserted with `status = "pending"`
+* Worker function:
+    * Fetches pending jobs
+    * Processes them using OpenAI
+    * Updates status to `completed` or `failed`
+* Frontend polls for updates every 2 seconds
+
+This demonstrates **non-blocking asynchronous processing** without requiring external queue infrastructure.
+
 ## LLM Integration
+
+The app uses OpenAI to:
+* Explain how the cipher works
+* Describe the role of the keyword and numeric key
+* Evaluate cipher strength
+
+Example output includes:
+* Structural explanation
+* Security assessment
+* Clear, user-friendly breakdown
 
 ## Setup Instructions
 
+### 1. Clone the repository
+```
+git clone https://github.com/EAshby2208/cipher-app.git
+cd cipher-app
+```
+### 2. Install dependencies
+```bash
+npm install
+```
+### 3. Configure environment variables
+Create a `.env.local` file:
+```
+NEXT_PUBLIC_SUPABASE_URL=your_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_key
+
+OPENAI_API_KEY=your_openai_key
+OPENAI_MODEL=gpt-4.1-mini
+
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+
+(optional for testing without API usage)
+DRY_RUN=true
+```
+### 4. Run the development server
+```md
+npm run dev
+```
+
 ## Testing the Application
+
+### Cipher Functionality
+* Enter text + keyphrase + numeric code
+* Test both encode and decode
+
+### Message Storage
+* Save messages
+* Verify they appear in dashboard
+* Test delete functionality
+
+### AI Analysis
+1. Click **Analyze Cipher**
+2. Observe:
+    * Job created in database (`pending`)
+    * Status updates to `completed`
+    * AI response appears in UI
+
+## Future Improvements
+* Add Redis-based queue for scalability
+* Add AI suggestions for stronger keys
+* Add pagination for message history
+* Enhance UI and visualizations
 
 ## Author
 Elisabeth Ashby
